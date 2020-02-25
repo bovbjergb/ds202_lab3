@@ -1,0 +1,65 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r}
+#Britt's Computer Set-Up
+setwd("/Users/brittbovbjerg/Desktop/DS202/ds202_lab3")
+install.packages("readxl")
+dat <- readxl::read_xls("/Users/brittbovbjerg/Desktop/DS202/ds202_lab3/GSS.xls")
+library(plyr)
+
+#Stephanie's Computer Set-Up 
+
+#data cleaning 
+colnames(dat) <- c('year', "married", "children", "sex","party","relig","happy", "happy_marriage","health")
+str(dat)
+
+#list of row values that need to be removed to answer questions 
+count(dat, 'married')
+#need to remove "No answer" = 27 respondents 
+count(dat, 'children')
+#need to remove "Dk na" = 201 respondents 
+count(dat, "party")
+#need to remove "Don't know" =11 and "No answer" = 407 and "Other party" = 1072 
+count(dat, "relig")
+#need to remove "Dk,na" = 595 
+count(dat, "happy") 
+#need to remove "Don't know" = 39, "No answer" = 338, and "Not applicable" = 4383 
+count(dat, "happy_marriage")
+#need to remove "Don't know" = 51, "No answer" 162, and "Not applicable" = 34043 
+count(dat, "health")
+#need to remove "Don't know" = 35, and "No answer" = 90 
+
+
+```
+1. How does the happiness of a respondent relate to the marriage status? 
+```{r}
+#cleaning a dataset for questions 1 and 2
+dat1 <- dat[!(dat$happy =="No answer" | dat$happy =="Not applicable" | dat$happy =="Don't know" | dat$married == "No answer"),] 
+
+library(ggplot2)
+ggplot(dat1, aes(happy)) + geom_bar(aes(fill = married), position = "fill")
+
+```
+Those who were married were the only group that were the majority very happy. The seperated, windowed, and divorced were all majority not too happy, with the never married being split between most of them being not too happy and pretty happy.
+
+
+2. Does the sex of respondent affect the relationship you found in Q1?
+
+
+3. How does the happiness of a respondent relate to the political party affiliation? 
+```{r}
+
+```
+
+4. Raise four questions that can be answered by the GSS dataset. Extract appropriate data from the website, explore, and answer the questions. 
+
+-Does religion correlate with happiness? Does the number of children affect this relationship? 
+
+-Does political affiliation correlate with happiness? Does marital status affect this relationship? 
+
+-Does happiness in marriage correlate with general happiness? How does health and gender effect this relationsihp? 
+
+-How has marital happiness changed over time? Does gender effect this relationship? 
+
