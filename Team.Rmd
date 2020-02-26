@@ -1,17 +1,12 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 ```{r}
-#Britt's Computer Set-Up
-#setwd("/Users/brittbovbjerg/Desktop/DS202/ds202_lab3")
 #install.packages("readxl")
-#dat <- readxl::read_xls("/Users/brittbovbjerg/Desktop/DS202/ds202_lab3/GSS.xls")
-#library(plyr)
-
-#Stephanie's Computer Set-Up 
-install.packages('readxl')
-dat <- readxl :: read_xls('C:/Users/srmil/Documents/Desktop/ds202/ds202_lab3/ds202_lab3/GSS.xls')
+dat <- readxl::read_xls("/Users/brittbovbjerg/Desktop/DS202/ds202_lab3-master/GSS.xls")
 library(dplyr)
 
 #data cleaning 
@@ -41,6 +36,7 @@ count(dat, "health")
 #cleaning a dataset for questions 1 and 2
 dat1 <- dat[!(dat$happy =="No answer" | dat$happy =="Not applicable" | dat$happy =="Don't know" | dat$married == "No answer"),] 
 
+
 library(ggplot2)
 ggplot(dat1, aes(happy)) + geom_bar(aes(fill = married), position = "fill")
 
@@ -50,29 +46,53 @@ Those who were married were the only group that were the majority very happy. Th
 
 2. Does the sex of respondent affect the relationship you found in Q1?
 ```{r}
-ggplot(dat1, aes(happy)) + geom_bar(aes(fill = married), position = "fill") + facet_wrap(~sex)
+ggplot(dat1, aes(happy)) + geom_bar(aes(fill = married), position = "fill") + facet_wrap(~sex) + coord_flip() + labs(title="Relationship Between Happiness and Marital Status by Sex", x = "Overal Happiness", y = "Proportion of Sample") + theme(plot.title = element_text(hjust = 0.5))
 ```
 Men and women who are "Not too happy" seem to be the same except that there seems to be more unhappiness in men who have never married than women who have never married and there is more unhappinness among women who are widowed than men who are widowed. The "Pretty Happy" bars look very close to the same, there are a smaller number of widowed men who are pretty happy and a larger number of women who are divorced. The "Very Happy" column looks the same, but there are a larger number of men who never married who say they are pretty happy and a much larger number of women who are widowed who say they are very happy.
 
 3. How does the happiness of a respondent relate to the political party affiliation? 
 ```{r}
+dat4 <- dat[!(dat$happy =="No answer" | dat$happy =="Not applicable" | dat$happy =="Don't know" | dat$party == "Don't know" | dat$party == "No answer" | dat$party == "Other party"),]
+
+dat4$party <- factor(dat4$party, levels = c("Strong republican", "Not str republican", "Ind,near rep","Independent", "Ind,near dem", "Not str democrat","Strong democrat"))
+
+
+ggplot(dat4, aes(happy)) + geom_bar(aes(fill = party), position = "fill")
 
 ```
-
+It seems like the most democrats hare mostly not too happy, while most srepublicans are very happy and all the other groups seems to be equally spread between not too happy, pretty happy, and very happy. 
 
 4. Raise four questions that can be answered by the GSS dataset. Extract appropriate data from the website, explore, and answer the questions. 
 
--Does religion correlate with happiness? Does the number of children affect this relationship? 
+1. Does religion correlate with happiness? Does the number of children affect this relationship? 
+```{r}
+dat5 <- select(dat, "children","happy", "relig")
+sum(is.na(dat5))
+dat5 <- dat5[!(dat5$happy =="No answer" | dat5$happy =="Not applicable" | dat5$happy =="Don't know"),]
+dat5 <- dat5[!(dat5$children == "Dk na"),]
+dat5 <- dat5[!(dat5$relig == "Dk,na"),]
 
+ggplot(dat5, aes(happy)) + geom_bar(aes(fill = relig), position = "fill")
 
--Does political affiliation correlate with happiness? Does marital status affect this relationship? 
+```
+
+People who attended religious services more frequently tended to be the most happy, while people who went to less religious (or no religious services) were less happy. 
+```{r}
+ggplot(dat5, aes(happy)) + geom_bar(aes(fill = relig), position = "fill") + facet_wrap(~children)
+
+```
+
+The relationship appears to be unchanged by number of children of the respondent. 
+
+2. Does political affiliation correlate with happiness? Does marital status affect this relationship? 
 ```{r}
 
 dat2 <- select(dat, 'party','happy','happy_marriage')
 sum(is.na(dat2))
 dat2 <- dat2[!(dat2$happy =="No answer" | dat2$happy =="Not applicable" | dat2$happy =="Don't know"),]
-dat2 <- dat2[!(dat2$party =="No answer" | dat2$party =="Not applicable" | dat2$party =="Don't know"),]
+dat2 <- dat2[!(dat2$party =="No answer" | dat2$party =="Not applicable" | dat2$party =="Don't know" | dat2$party =="Other party"),]
 dat2 <- dat2[!(dat2$happy_marriage =="No answer" | dat2$happy_marriage =="Not applicable" | dat2$happy_marriage =="Don't know"),]
+
 
 ggplot(dat2,(aes(party))) + geom_bar(aes(fill=happy), position= 'dodge') + coord_flip()
 ```
@@ -84,7 +104,7 @@ ggplot(dat2,(aes(happy_marriage))) + geom_bar(aes(fill= happy), position= 'dodge
 ```
 
 
--Does happiness in marriage correlate with general happiness? How does health and gender effect this relationsihp? 
+3. Does happiness in marriage correlate with general happiness? How does health and gender effect this relationsihp? 
 
 ```{r}
 dat3<- select(dat, 'sex','happy','happy_marriage','health')
@@ -101,5 +121,17 @@ ggplot(dat3, aes(happy_marriage)) + geom_bar(aes(fill = happy))+ facet_grid(heal
 ```
 People who have excellent or good health tend to be happier and have happier marriages. The bars between the sexes look very much the same.
 
--How has marital happiness changed over time? Does gender effect this relationship? 
+4. How has marital happiness changed over time? Does gender effect this relationship? 
+```{r}
+dat6<- select(dat, 'sex','year','happy_marriage')
+dat6 <- dat6[!(dat6$happy_marriage =="No answer" | dat6$happy_marriage =="Not applicable" | dat6$happy_marriage =="Don't know"),]
+
+
+ggplot(dat6, aes(year)) + geom_bar(aes(fill = happy_marriage), position = "fill") 
+```
+It seems like  overall the proportion of not too happy people in marriage has gone down a tiny bit, but overall it seems fairly stable over time. 
+```{r}
+ggplot(dat6, aes(year)) + geom_bar(aes(fill = happy_marriage), position = "fill") + facet_grid(~sex)
+```
+A larger share of men are very happy compared to women, and less men than women were not too happy, though the trends seem stable over time. 
 
